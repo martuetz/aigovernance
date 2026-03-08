@@ -11,7 +11,7 @@ export async function GET() {
 
   try {
     const resolvedUrl = url.trim().replace(/^libsql:\/\//, "https://");
-    const client = createClient({ url: resolvedUrl, authToken });
+    const client = createClient({ url: resolvedUrl, authToken: authToken?.trim() });
     const result = await client.execute("SELECT 1 as ok");
     return NextResponse.json({ status: "ok", rows: result.rows });
   } catch (error) {

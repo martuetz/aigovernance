@@ -62,7 +62,9 @@
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''exports'', {}\\), indent=2\\)\\)\")",
       "Bash(curl -s \"https://ai-governance.vercel.app/api/healthz\")",
       "Bash(curl -s -o /dev/null -w \"/ status: %{http_code}\" \"https://ai-governance.vercel.app/\")",
-      "Bash(python3 -m json.tool)"
+      "Bash(python3 -m json.tool)",
+      "Bash(curl -s -o /dev/null -w \"/ status: %{http_code}\\\\n\" \"https://ai-governance.vercel.app/\")",
+      "Bash(curl -s \"https://ai-governance.vercel.app/api/agents\")"
     ]
   }
 }
