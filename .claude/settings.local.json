@@ -6,7 +6,14 @@
       "Bash(npx create-next-app@latest . --typescript --tailwind --eslint --app --src-dir --import-alias \"@/*\" --yes)",
       "Bash(npm install @anthropic-ai/sdk drizzle-orm better-sqlite3 zod date-fns lucide-react)",
       "Bash(npm install -D drizzle-kit @types/better-sqlite3)",
-      "Bash(npx shadcn@latest init -d --yes)"
+      "Bash(npx shadcn@latest init -d --yes)",
+      "Bash(npx shadcn@latest add card input label select textarea table badge dialog tabs sheet separator dropdown-menu alert toast form --yes)",
+      "Bash(npx shadcn@latest add card input label select textarea table badge dialog tabs sheet separator dropdown-menu alert sonner form --yes)",
+      "Bash(npx shadcn@latest add form --yes)",
+      "Bash(npx drizzle-kit push)",
+      "Bash(npx tsx src/lib/db/seed.ts)",
+      "Bash(npm run build)",
+      "mcp__Claude_Preview__preview_start"
     ]
   }
 }
