@@ -1,28 +1,41 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@libsql/client/http";
 
 export async function GET() {
-  const url = process.env.TURSO_DATABASE_URL;
+  const url = process.env.TURSO_DATABASE_URL ?? "";
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
-  if (!url) {
-    return NextResponse.json({ status: "error", message: "TURSO_DATABASE_URL not set" }, { status: 500 });
+  // Debug: show exact URL chars
+  const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
+  const charCodes = [...resolvedUrl].map((c) => c.charCodeAt(0));
+
+  // Test new URL directly
+  let urlTest: string;
+  try {
+    new URL(resolvedUrl);
+    urlTest = "ok";
+  } catch (e) {
+    urlTest = e instanceof Error ? e.message : String(e);
   }
 
+  // Test fetch directly
+  let fetchTest: unknown;
   try {
-    const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
-    const client = createClient({ url: resolvedUrl, authToken });
-    const result = await client.execute("SELECT 1 as ok");
-    return NextResponse.json({ status: "ok", urlPrefix: resolvedUrl.substring(0, 40), rows: result.rows });
-  } catch (error) {
-    return NextResponse.json(
-      {
-        status: "error",
-        message: error instanceof Error ? error.message : String(error),
-        stack: error instanceof Error ? error.stack?.split("\n").slice(0, 10) : undefined,
-        urlPrefix: url.substring(0, 40),
-      },
-      { status: 500 }
-    );
+    const res = await fetch(`${resolvedUrl}/v2/pipeline`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
+      body: JSON.stringify({ requests: [{ type: "execute", stmt: { sql: "SELECT 1" } }, { type: "close" }] }),
+    });
+    fetchTest = { status: res.status, ok: res.ok };
+  } catch (e) {
+    fetchTest = { error: e instanceof Error ? e.message : String(e) };
   }
+
+  return NextResponse.json({
+    resolvedUrl,
+    charCodes: charCodes.slice(0, 10),
+    urlLength: resolvedUrl.length,
+    urlTest,
+    fetchTest,
+    nodeVersion: process.version,
+  });
 }
