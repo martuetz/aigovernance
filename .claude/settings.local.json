@@ -13,7 +13,19 @@
       "Bash(npx drizzle-kit push)",
       "Bash(npx tsx src/lib/db/seed.ts)",
       "Bash(npm run build)",
-      "mcp__Claude_Preview__preview_start"
+      "mcp__Claude_Preview__preview_start",
+      "Bash(gh repo create martuetz/aigovernance --public --description \"AI Governance & Trust Layer — LLM-powered middleware for AI agent ecosystems\")",
+      "Bash(npm install -g vercel)",
+      "Bash(sudo npm install -g vercel)",
+      "Bash(npx vercel --version)",
+      "Bash(turso --version)",
+      "Bash(turso auth status)",
+      "Bash(turso auth whoami)",
+      "Bash(turso auth login)",
+      "Bash(turso db create aigovernance)",
+      "Bash(npm install @libsql/client)",
+      "Bash(TURSO_DATABASE_URL=\"libsql://aigovernance-martuetz.aws-eu-west-1.turso.io\" TURSO_AUTH_TOKEN=\"eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9.eyJpYXQiOjE3NzI5NTkzNjIsImlkIjoiMDE5Y2NjOWMtY2IwMS03ZDVlLWE5YTItZTc5ZTljN2Y0ZWU4IiwicmlkIjoiMjc3YWM2MDYtNGI4Yi00ODQyLWE3NWItMDcwMmQ5ZDczMTVjIn0.r8ShK96LdKRnS_xgy1hgFPmlwrJpTP-Q-M_nkwpCh3qKZp2Ef7HSeVVpYjY2y9xkenFWg4RjhYxiKW3Hxq1uAA\" npx drizzle-kit push)",
+      "Bash(npm install dotenv)"
     ]
   }
 }

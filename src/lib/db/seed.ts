@@ -1,15 +1,18 @@
-import Database from "better-sqlite3";
-import { drizzle } from "drizzle-orm/better-sqlite3";
+import { createClient } from "@libsql/client";
+import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
+import * as dotenv from "dotenv";
 import path from "path";
 
-const DB_PATH = path.join(process.cwd(), "data", "governance.db");
-const sqlite = new Database(DB_PATH);
-sqlite.pragma("journal_mode = WAL");
-sqlite.pragma("foreign_keys = ON");
-const db = drizzle(sqlite, { schema });
+dotenv.config({ path: path.resolve(process.cwd(), ".env.local") });
 
-function seed() {
+const client = createClient({
+  url: process.env.TURSO_DATABASE_URL!,
+  authToken: process.env.TURSO_AUTH_TOKEN,
+});
+const db = drizzle(client, { schema });
+
+async function seed() {
   console.log("Seeding database...");
 
   // --- Agents ---
@@ -56,10 +59,7 @@ function seed() {
   ];
 
   for (const agent of agentData) {
-    db.insert(schema.agents)
-      .values(agent)
-      .onConflictDoNothing()
-      .run();
+    await db.insert(schema.agents).values(agent).onConflictDoNothing();
   }
   console.log(`  Seeded ${agentData.length} agents`);
 
@@ -128,10 +128,7 @@ function seed() {
   ];
 
   for (const policy of policyData) {
-    db.insert(schema.policies)
-      .values(policy)
-      .onConflictDoNothing()
-      .run();
+    await db.insert(schema.policies).values(policy).onConflictDoNothing();
   }
   console.log(`  Seeded ${policyData.length} policies`);
 
@@ -221,15 +218,13 @@ function seed() {
   ];
 
   for (const log of auditData) {
-    db.insert(schema.auditLogs)
-      .values(log)
-      .onConflictDoNothing()
-      .run();
+    await db.insert(schema.auditLogs).values(log).onConflictDoNothing();
   }
   console.log(`  Seeded ${auditData.length} audit log entries`);
 
   // --- Sample Escalation ---
-  db.insert(schema.escalations)
+  await db
+    .insert(schema.escalations)
     .values({
       id: "esc-1",
       auditLogId: auditData[0].id,
@@ -242,11 +237,13 @@ function seed() {
       riskLevel: "high",
       status: "pending",
     })
-    .onConflictDoNothing()
-    .run();
+    .onConflictDoNothing();
   console.log("  Seeded 1 pending escalation");
 
   console.log("Seed complete!");
 }
 
-seed();
+seed().catch((err) => {
+  console.error("Seed failed:", err);
+  process.exit(1);
+});
