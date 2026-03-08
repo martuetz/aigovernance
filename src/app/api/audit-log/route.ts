@@ -42,11 +42,10 @@ export async function GET(request: NextRequest) {
     .limit(limit)
     .offset(offset);
 
-  const countResult = db
+  const [countResult] = await db
     .select({ count: sql<number>`count(*)` })
     .from(auditLogs)
-    .where(whereClause)
-    .get();
+    .where(whereClause);
 
   const parsed = results.map((entry) => ({
     ...entry,
