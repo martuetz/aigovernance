@@ -59,7 +59,9 @@
       "Bash(curl -s \"https://ai-governance.vercel.app/api/agents\" -w \"\\\\n\\\\nHTTP Status: %{http_code}\")",
       "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" \"https://ai-governance.vercel.app/api/agents\")",
       "Bash(node -e \"const pkg = require\\(''@libsql/client/package.json''\\); console.log\\(JSON.stringify\\(pkg.exports, null, 2\\)\\)\")",
-      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''exports'', {}\\), indent=2\\)\\)\")"
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''exports'', {}\\), indent=2\\)\\)\")",
+      "Bash(curl -s \"https://ai-governance.vercel.app/api/healthz\")",
+      "Bash(curl -s -o /dev/null -w \"/ status: %{http_code}\" \"https://ai-governance.vercel.app/\")"
     ]
   }
 }
