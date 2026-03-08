@@ -61,7 +61,8 @@
       "Bash(node -e \"const pkg = require\\(''@libsql/client/package.json''\\); console.log\\(JSON.stringify\\(pkg.exports, null, 2\\)\\)\")",
       "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''exports'', {}\\), indent=2\\)\\)\")",
       "Bash(curl -s \"https://ai-governance.vercel.app/api/healthz\")",
-      "Bash(curl -s -o /dev/null -w \"/ status: %{http_code}\" \"https://ai-governance.vercel.app/\")"
+      "Bash(curl -s -o /dev/null -w \"/ status: %{http_code}\" \"https://ai-governance.vercel.app/\")",
+      "Bash(python3 -m json.tool)"
     ]
   }
 }

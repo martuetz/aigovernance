@@ -1,41 +1,26 @@
 import { NextResponse } from "next/server";
+import { createClient } from "@libsql/client/http";
 
 export async function GET() {
-  const url = process.env.TURSO_DATABASE_URL ?? "";
+  const url = process.env.TURSO_DATABASE_URL;
   const authToken = process.env.TURSO_AUTH_TOKEN;
 
-  // Debug: show exact URL chars
-  const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
-  const charCodes = [...resolvedUrl].map((c) => c.charCodeAt(0));
-
-  // Test new URL directly
-  let urlTest: string;
-  try {
-    new URL(resolvedUrl);
-    urlTest = "ok";
-  } catch (e) {
-    urlTest = e instanceof Error ? e.message : String(e);
+  if (!url) {
+    return NextResponse.json({ status: "error", message: "TURSO_DATABASE_URL not set" }, { status: 500 });
   }
 
-  // Test fetch directly
-  let fetchTest: unknown;
   try {
-    const res = await fetch(`${resolvedUrl}/v2/pipeline`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json", Authorization: `Bearer ${authToken}` },
-      body: JSON.stringify({ requests: [{ type: "execute", stmt: { sql: "SELECT 1" } }, { type: "close" }] }),
-    });
-    fetchTest = { status: res.status, ok: res.ok };
-  } catch (e) {
-    fetchTest = { error: e instanceof Error ? e.message : String(e) };
+    const resolvedUrl = url.trim().replace(/^libsql:\/\//, "https://");
+    const client = createClient({ url: resolvedUrl, authToken });
+    const result = await client.execute("SELECT 1 as ok");
+    return NextResponse.json({ status: "ok", rows: result.rows });
+  } catch (error) {
+    return NextResponse.json(
+      {
+        status: "error",
+        message: error instanceof Error ? error.message : String(error),
+      },
+      { status: 500 }
+    );
   }
-
-  return NextResponse.json({
-    resolvedUrl,
-    charCodes: charCodes.slice(0, 10),
-    urlLength: resolvedUrl.length,
-    urlTest,
-    fetchTest,
-    nodeVersion: process.version,
-  });
 }

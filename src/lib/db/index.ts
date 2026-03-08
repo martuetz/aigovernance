@@ -10,8 +10,8 @@ function createDb() {
     throw new Error("TURSO_DATABASE_URL environment variable is required");
   }
 
-  // Use https:// for the HTTP client (works in all serverless environments)
-  const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
+  // Trim and convert libsql:// to https:// for serverless compatibility
+  const resolvedUrl = url.trim().replace(/^libsql:\/\//, "https://");
   const client = createClient({ url: resolvedUrl, authToken });
   return drizzle(client, { schema });
 }
