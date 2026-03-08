@@ -31,13 +31,11 @@ export async function POST(request: NextRequest) {
     const validated = policyCreateSchema.parse(body);
 
     const id = crypto.randomUUID();
-    db.insert(policies)
-      .values({
-        id,
-        ...validated,
-        escalationRule: validated.escalationRule ?? null,
-      })
-      .run();
+    await db.insert(policies).values({
+      id,
+      ...validated,
+      escalationRule: validated.escalationRule ?? null,
+    });
 
     const created = await db.query.policies.findFirst({
       where: eq(policies.id, id),

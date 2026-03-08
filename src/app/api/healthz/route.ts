@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/http";
 
 export async function GET() {
   const url = process.env.TURSO_DATABASE_URL;
@@ -13,13 +13,13 @@ export async function GET() {
     const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
     const client = createClient({ url: resolvedUrl, authToken });
     const result = await client.execute("SELECT 1 as ok");
-    return NextResponse.json({ status: "ok", urlPrefix: resolvedUrl.substring(0, 30), rows: result.rows });
+    return NextResponse.json({ status: "ok", urlPrefix: resolvedUrl.substring(0, 40), rows: result.rows });
   } catch (error) {
     return NextResponse.json(
       {
         status: "error",
         message: error instanceof Error ? error.message : String(error),
-        urlPrefix: url.substring(0, 30),
+        urlPrefix: url.substring(0, 40),
       },
       { status: 500 }
     );

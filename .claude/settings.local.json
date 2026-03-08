@@ -34,7 +34,32 @@
       "Bash(printenv ANTHROPIC_API_KEY)",
       "Bash(npx vercel --prod --yes)",
       "Bash(npm install @google/generative-ai)",
-      "Bash(npx vercel env add GOOGLE_API_KEY production --yes)"
+      "Bash(npx vercel env add GOOGLE_API_KEY production --yes)",
+      "Bash(npx vercel logs https://ai-governance.vercel.app)",
+      "Bash(curl -s https://ai-governance.vercel.app/)",
+      "Bash(curl -s \"https://ai-governance.vercel.app/api/audit-log\")",
+      "Bash(curl -v \"https://ai-governance.vercel.app/api/audit-log\")",
+      "Bash(npx vercel env ls)",
+      "Bash(npx vercel logs --since 1h)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://ai-governance.vercel.app/\")",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://ai-governance.vercel.app/api/audit-log\")",
+      "Bash(npx vercel logs --since 5m)",
+      "Bash(curl -v \"https://ai-governance-38jcd3gd1-martuetzs-projects.vercel.app/api/audit-log\")",
+      "Bash(npx vercel logs --since 3m)",
+      "Bash(npx vercel logs --since 15m)",
+      "Bash(curl -s -H \"Cache-Control: no-cache\" -H \"Pragma: no-cache\" \"https://ai-governance.vercel.app/api/audit-log\")",
+      "Bash(npx vercel inspect ai-governance-38jcd3gd1-martuetzs-projects.vercel.app --logs)",
+      "Bash(curl -s -o /dev/null -w \"%{http_code}\" \"https://ai-governance.vercel.app/api/agents\")",
+      "Bash(npx vercel logs --since 2m)",
+      "Bash(curl -s -I \"https://ai-governance.vercel.app/api/agents\")",
+      "Bash(npx vercel ls)",
+      "Bash(npx vercel logs ai-governance-38jcd3gd1-martuetzs-projects.vercel.app --since 1h)",
+      "Bash(node -e \"const { createClient } = require\\(''@libsql/client''\\); const c = createClient\\({ url: ''https://aigovernance-martuetz.aws-eu-west-1.turso.io'', authToken: process.env.TURSO_AUTH_TOKEN }\\); c.execute\\(''SELECT 1''\\).then\\(r => console.log\\(''OK'', r\\)\\).catch\\(e => console.error\\(''ERROR:'', e.message\\)\\)\")",
+      "Bash(node -e \":*)",
+      "Bash(curl -s \"https://ai-governance.vercel.app/api/agents\" -w \"\\\\n\\\\nHTTP Status: %{http_code}\")",
+      "Bash(curl -s -w \"\\\\nHTTP %{http_code}\" \"https://ai-governance.vercel.app/api/agents\")",
+      "Bash(node -e \"const pkg = require\\(''@libsql/client/package.json''\\); console.log\\(JSON.stringify\\(pkg.exports, null, 2\\)\\)\")",
+      "Bash(python3 -c \"import json,sys; d=json.load\\(sys.stdin\\); print\\(json.dumps\\(d.get\\(''exports'', {}\\), indent=2\\)\\)\")"
     ]
   }
 }

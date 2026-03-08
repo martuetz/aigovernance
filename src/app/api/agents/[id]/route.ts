@@ -54,7 +54,7 @@ export async function PUT(
     if (validated.description !== undefined)
       updateData.description = validated.description;
 
-    db.update(agents).set(updateData).where(eq(agents.id, id)).run();
+    await db.update(agents).set(updateData).where(eq(agents.id, id));
 
     const updated = await db.query.agents.findFirst({
       where: eq(agents.id, id),
@@ -90,10 +90,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Agent not found" }, { status: 404 });
   }
 
-  db.update(agents)
+  await db.update(agents)
     .set({ isActive: false, updatedAt: sql`(datetime('now'))` })
-    .where(eq(agents.id, id))
-    .run();
+    .where(eq(agents.id, id));
 
   return NextResponse.json({ success: true });
 }

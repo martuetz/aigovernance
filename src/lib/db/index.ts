@@ -1,4 +1,4 @@
-import { createClient } from "@libsql/client";
+import { createClient } from "@libsql/client/http";
 import { drizzle } from "drizzle-orm/libsql";
 import * as schema from "./schema";
 
@@ -10,7 +10,7 @@ function createDb() {
     throw new Error("TURSO_DATABASE_URL environment variable is required");
   }
 
-  // Convert libsql:// to https:// for Vercel serverless compatibility
+  // Use https:// for the HTTP client (works in all serverless environments)
   const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
   const client = createClient({ url: resolvedUrl, authToken });
   return drizzle(client, { schema });

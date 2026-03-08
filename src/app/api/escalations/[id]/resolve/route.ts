@@ -32,15 +32,14 @@ export async function POST(
       );
     }
 
-    db.update(escalations)
+    await db.update(escalations)
       .set({
         status: validated.resolution,
         resolutionNotes: validated.notes,
         assignedTo: validated.resolvedBy,
         resolvedAt: sql`(datetime('now'))`,
       })
-      .where(eq(escalations.id, id))
-      .run();
+      .where(eq(escalations.id, id));
 
     const updated = await db.query.escalations.findFirst({
       where: eq(escalations.id, id),

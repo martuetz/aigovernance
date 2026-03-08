@@ -36,17 +36,15 @@ export async function POST(request: NextRequest) {
     const validated = agentCreateSchema.parse(body);
 
     const id = crypto.randomUUID();
-    db.insert(agents)
-      .values({
-        id,
-        name: validated.name,
-        type: validated.type,
-        representedOrg: validated.representedOrg,
-        authorityLevel: validated.authorityLevel,
-        approvedScope: JSON.stringify(validated.approvedScope),
-        description: validated.description ?? null,
-      })
-      .run();
+    await db.insert(agents).values({
+      id,
+      name: validated.name,
+      type: validated.type,
+      representedOrg: validated.representedOrg,
+      authorityLevel: validated.authorityLevel,
+      approvedScope: JSON.stringify(validated.approvedScope),
+      description: validated.description ?? null,
+    });
 
     const created = await db.query.agents.findFirst({
       where: eq(agents.id, id),

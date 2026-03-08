@@ -52,7 +52,7 @@ export async function PUT(
     if (validated.escalationRule !== undefined)
       updateData.escalationRule = validated.escalationRule;
 
-    db.update(policies).set(updateData).where(eq(policies.id, id)).run();
+    await db.update(policies).set(updateData).where(eq(policies.id, id));
 
     const updated = await db.query.policies.findFirst({
       where: eq(policies.id, id),
@@ -85,10 +85,9 @@ export async function DELETE(
     return NextResponse.json({ error: "Policy not found" }, { status: 404 });
   }
 
-  db.update(policies)
+  await db.update(policies)
     .set({ isActive: false, updatedAt: sql`(datetime('now'))` })
-    .where(eq(policies.id, id))
-    .run();
+    .where(eq(policies.id, id));
 
   return NextResponse.json({ success: true });
 }
