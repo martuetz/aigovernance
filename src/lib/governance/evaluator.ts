@@ -1,4 +1,4 @@
-import { getAnthropicClient } from "@/lib/claude";
+import { getGoogleClient } from "@/lib/google";
 import { db } from "@/lib/db";
 import { agents, policies, auditLogs, escalations } from "@/lib/db/schema";
 import { eq } from "drizzle-orm";
@@ -35,26 +35,24 @@ export async function evaluateAction(
     const auditLogId = crypto.randomUUID();
     const reasoning = `Action "${request.actionType}" is outside the agent's approved scope. Approved actions: ${approvedScope.join(", ")}. This action was automatically blocked without LLM evaluation.`;
 
-    db.insert(auditLogs)
-      .values({
-        id: auditLogId,
-        agentId: agent.id,
-        agentName: agent.name,
-        representedParty: agent.representedOrg,
-        actionType: request.actionType,
-        actionDescription: request.actionDescription,
-        targetParty: request.targetParty ?? null,
-        dataInvolved: request.dataInvolved ?? null,
-        contextSummary: request.context ?? null,
-        decision: "BLOCK",
-        conditions: null,
-        reasoning,
-        riskLevel: "high",
-        riskCategories: JSON.stringify(["security"]),
-        policiesEvaluated: JSON.stringify([]),
-        escalationId: null,
-      })
-      .run();
+    await db.insert(auditLogs).values({
+      id: auditLogId,
+      agentId: agent.id,
+      agentName: agent.name,
+      representedParty: agent.representedOrg,
+      actionType: request.actionType,
+      actionDescription: request.actionDescription,
+      targetParty: request.targetParty ?? null,
+      dataInvolved: request.dataInvolved ?? null,
+      contextSummary: request.context ?? null,
+      decision: "BLOCK",
+      conditions: null,
+      reasoning,
+      riskLevel: "high",
+      riskCategories: JSON.stringify(["security"]),
+      policiesEvaluated: JSON.stringify([]),
+      escalationId: null,
+    });
 
     return {
       decision: "BLOCK",
@@ -75,18 +73,16 @@ export async function evaluateAction(
   // 4. Build the evaluation prompt
   const userMessage = buildEvaluationPrompt(agent, request, activePolicies);
 
-  // 5. Call Claude
-  const message = await getAnthropicClient().messages.create({
-    model: "claude-sonnet-4-20250514",
-    max_tokens: 2048,
-    system: GOVERNANCE_SYSTEM_PROMPT,
-    messages: [{ role: "user", content: userMessage }],
+  // 5. Call Gemini
+  const model = getGoogleClient().getGenerativeModel({
+    model: "gemini-2.0-flash",
+    systemInstruction: GOVERNANCE_SYSTEM_PROMPT,
   });
 
-  // 6. Parse the structured response
-  const responseText =
-    message.content[0].type === "text" ? message.content[0].text : "";
+  const result = await model.generateContent(userMessage);
+  const responseText = result.response.text();
 
+  // 6. Parse the structured response
   let parsed: {
     decision: Decision;
     conditions: string | null;
@@ -97,10 +93,8 @@ export async function evaluateAction(
   };
 
   try {
-    // Try direct parse first
     parsed = JSON.parse(responseText);
   } catch {
-    // Try extracting JSON from markdown code block
     const jsonMatch = responseText.match(/```(?:json)?\s*([\s\S]*?)```/);
     if (jsonMatch) {
       parsed = JSON.parse(jsonMatch[1].trim());
@@ -109,48 +103,43 @@ export async function evaluateAction(
     }
   }
 
-  // 7. Create audit log entry
+  // 7. Create escalation if needed
   const auditLogId = crypto.randomUUID();
   let escalationId: string | undefined;
 
-  // 8. Create escalation if needed
   if (parsed.decision === "ESCALATE") {
     escalationId = crypto.randomUUID();
-
-    db.insert(escalations)
-      .values({
-        id: escalationId,
-        auditLogId,
-        agentId: agent.id,
-        actionType: request.actionType,
-        actionDescription: request.actionDescription,
-        reasoning: parsed.reasoning,
-        riskLevel: parsed.riskLevel,
-        status: "pending",
-      })
-      .run();
-  }
-
-  db.insert(auditLogs)
-    .values({
-      id: auditLogId,
+    await db.insert(escalations).values({
+      id: escalationId,
+      auditLogId,
       agentId: agent.id,
-      agentName: agent.name,
-      representedParty: agent.representedOrg,
       actionType: request.actionType,
       actionDescription: request.actionDescription,
-      targetParty: request.targetParty ?? null,
-      dataInvolved: request.dataInvolved ?? null,
-      contextSummary: request.context ?? null,
-      decision: parsed.decision,
-      conditions: parsed.conditions ?? null,
       reasoning: parsed.reasoning,
       riskLevel: parsed.riskLevel,
-      riskCategories: JSON.stringify(parsed.riskCategories),
-      policiesEvaluated: JSON.stringify(parsed.policiesEvaluated),
-      escalationId: escalationId ?? null,
-    })
-    .run();
+      status: "pending",
+    });
+  }
+
+  // 8. Create audit log entry
+  await db.insert(auditLogs).values({
+    id: auditLogId,
+    agentId: agent.id,
+    agentName: agent.name,
+    representedParty: agent.representedOrg,
+    actionType: request.actionType,
+    actionDescription: request.actionDescription,
+    targetParty: request.targetParty ?? null,
+    dataInvolved: request.dataInvolved ?? null,
+    contextSummary: request.context ?? null,
+    decision: parsed.decision,
+    conditions: parsed.conditions ?? null,
+    reasoning: parsed.reasoning,
+    riskLevel: parsed.riskLevel,
+    riskCategories: JSON.stringify(parsed.riskCategories),
+    policiesEvaluated: JSON.stringify(parsed.policiesEvaluated),
+    escalationId: escalationId ?? null,
+  });
 
   return {
     ...parsed,
