@@ -10,7 +10,9 @@ function createDb() {
     throw new Error("TURSO_DATABASE_URL environment variable is required");
   }
 
-  const client = createClient({ url, authToken });
+  // Convert libsql:// to https:// for Vercel serverless compatibility
+  const resolvedUrl = url.replace(/^libsql:\/\//, "https://");
+  const client = createClient({ url: resolvedUrl, authToken });
   return drizzle(client, { schema });
 }
 
